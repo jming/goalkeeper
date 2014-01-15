@@ -1,0 +1,24 @@
+
+*, 
+body,
+input,
+select,
+textarea,
+button,
+.ui-btn,
+.ui-body-a input,
+.ui-body-b input,
+.ui-body-c input,
+.ui-overlay-a a, .ui-page-theme-a a, html .ui-bar-a a, html .ui-body-a a, html body .ui-group-theme-a a,
+.ui-bar-a a.ui-link,
+.ui-mobile label, div.ui-controlgroup-label
+{
+	font-family:"Lato";
+	font-weight:400;
+}
+
+.ui-header .ui-title,
+.ui-footer .ui-title {
+    font-weight:300;
+    font-size:24px;
+}

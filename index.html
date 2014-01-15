@@ -1,0 +1,178 @@
+<!DOCTYPE html> 
+<html> 
+
+  <head>
+
+    <title>Goal Keeper</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <!-- styles -->
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.0/jquery.mobile-1.4.0.min.css" />
+    <link rel='stylesheet' href='css/app.css' />
+    <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700' rel='stylesheet' type='text/css'>
+
+    <!-- scripts -->
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.0/jquery.mobile-1.4.0.min.js"></script>
+    <script src='js/app.js'></script>
+
+  </head> 
+
+  <body> 
+
+    <div data-role='page' id='list-goals'>
+      
+      <div data-role='header'>
+        <h1>Goal Keeper</h1>
+      </div><!-- header -->
+
+      <div role='main' class='ui-content'>
+
+        <fieldset class='ui-grid-a ui-responsive'>
+          <div class='ui-block-a'>
+            <a href='#add-goal' class='ui-btn ui-btn-icon-left ui-icon-plus' id='add-goal-button'>Add goal</a><!-- add goal button -->
+          </div>
+          <div class='ui-block-b'>
+            <button id='clear-all-goals' class="ui-btn ui-icon-delete ui-btn-icon-left">Clear goals</button>
+          </div>
+        </fieldset>
+        
+        <!-- sort by selector -->
+        <form>
+          <div class="ui-field-contain">
+              <label for="sort-goals">Sort by:</label>
+              <select name="sort-goals" id="sort-goal">
+                  <option value="date">Date</option>
+                  <option value="name">Name</option>
+              </select>
+          </div>
+        </form>
+        
+        <!-- list (sorted by default) -->
+        <ul data-role="listview" data-inset="true" id="goals-list" class="patient-view">
+          <center><p id="no-goals" style='background:#ffff99;'>You currently have no goals stored.</p></center>
+        </ul>
+
+      </div><!-- content -->
+
+    </div><!-- list-goals page --> 
+
+    <div data-role='page' id='add-goal'>
+
+      <div data-role='header'>
+        <a href='#list-goals' class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-back ui-btn-icon-notext" style='margin:10px;'>back</a>
+        <h1 id='add-goals-heading'>New goal</h1>
+      </div><!-- add-goal header -->
+
+      <div data-role='main' class='ui-content'>
+        <form id='add-goal-form'>
+
+          <div data-role='fieldcontain' style='display:none;'>
+            <label for='goal-id'>Goal Id: </label>
+            <input type='text' name='goal-id' id='goal-id' value='' />
+          </div><!-- hidden field for concernid -->
+
+          <div data-role='fieldcontain' id='goal-date-field' style='display:none;'>
+            <label for="goal-date">Date added:</label>
+            <input type="text" name="goal-date" id="goal-date" disabled/>
+          </div><!-- date added input field -->
+
+          <div data-role="fieldcontain">
+            <label for="goal-name">Goal:</label>
+            <input type="text" name="goal-name" id="goal-name">
+          </div><!-- concern name input field -->
+
+          <div data-role='fieldcontain'>
+            <fieldset data-role='controlgroup' id='team-choices'>
+
+              <legend>Team:</legend>
+              <div id='team-choices-div'></div>
+
+              <div>
+
+                <p id='no-team'>You currently have no caregivers stored.</p>
+
+                <a href='#add-team' data-rel='popup' class='ui-btn' id='add-team-button'>Add caregiver</a>
+
+                <div data-role='popup' id='add-team'>
+                  <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+
+                  <form>
+                    <div style='padding:10px 20px;'>
+                      <h3> Add a caregiver </h3>
+                      <label for='caregiver-name'>Caregiver name:</label>
+                      <input type='text' name='cg-name' id='cg-name'>
+                      <label for='cg-specialty'>Specialty:</label>
+                      <input type='text' name='cg-specialty' id='cg-specialty'>
+                      <a href="#" data-rel="back" class="ui-btn" id='add-team-action'>Add</a>
+                    </div>
+                  </form><!-- add team form -->
+
+                </div><!-- add team popup -->
+              </div><!-- add team member div -->
+            </fieldset>
+          </div><!-- team member field -->
+
+          <div data-role='fieldcontain'>
+            <label for='goal-notes'>
+              Notes:
+              <a href='#edit-notes-popup' data-rel='popup' id='edit-notes-button' class='ui-btn ui-shadow ui-corner-all ui-icon-edit ui-btn-icon-notext' style='display:none;'></a>
+              </label>
+            <textarea name='goal-notes' id='goal-notes'></textarea>
+          </div><!-- notes input field -->
+
+          <a id='add-goal-action' class="ui-btn">Submit goal</a>
+
+        </form><!-- add goal form -->
+
+      </div><!-- add-goal content -->
+
+    </div><!-- add-goal page -->
+
+    <div data-role='page' id='status-update'>
+      <div data-role='header'>
+        <a href='#list-goals' class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-back ui-btn-icon-notext" style='margin:10px;'>back</a>
+        <h1>New status update</h1>
+      </div><!-- status-update header -->
+      <div data-role='main' class='ui-content'>
+
+        <form>
+
+          <div data-role='fieldcontain' style='display:none;'>
+            <label for='update-goal-id'>Update Id: </label>
+            <input type='text' name='update-goal-id' id='update-goal-id' value='' />
+          </div><!-- hidden field for concernid -->
+
+          <div data-role='fieldcontain' id='update-date-field'>
+            <label for="update-date">Date of update:</label>
+            <input type="text" name="update-date" id="update-date" disabled />
+          </div><!-- date added input field -->
+
+          <div data-role="fieldcontain">
+            <label for="update-goal-name">Goal:</label>
+            <input type="text" name="update-goal-name" id="update-goal-name" disabled />
+          </div><!-- concern name input field -->
+
+
+          <div data-role='fieldcontain'>
+            <label for="update-progress">Progress:</label>
+            <input type="range" name="update-progress" id="update-progress" min="0" max="100" value="50">
+          </div>
+
+          <div data-role='fieldcontain'>
+            <label for='update-notes'>Notes:</label>
+            <textarea name='update-notes' id='update-notes'></textarea>
+          </div><!-- notes input field -->
+
+          <button id='update-action' class='ui-btn'>Submit update</button>
+
+        </form>
+
+
+
+      </div><!-- status-update content -->
+    </div><!-- status-update page -->
+
+  </body>
+
+</html>
