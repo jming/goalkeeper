@@ -12,7 +12,8 @@ db.transaction (function (transaction) {
     + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
     + "name VARCHAR(100) NOT NULL, "
     + "date DATETIME NOT NULL, "
-    + "team VARCHAR(100) NOT NULL,"
+    + "team VARCHAR(100) NOT NULL, "
+    + "team_string TEXT NOT NULL, "
     + "notes TEXT NOT NULL)"
   transaction.executeSql(
     sql, 
@@ -24,7 +25,7 @@ db.transaction (function (transaction) {
   );
 });
 
-// doctors database
+// caregivers database
 db.transaction (function (transaction) {
   var sql = "CREATE TABLE IF NOT EXISTS caregivers "
     + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," 
@@ -115,12 +116,37 @@ $(document).on('tap', '#add-goal-action', function () {
       team += ',' + $(team_checked[n]).attr('id');
     }
 
-    // add to databasae
+    // create team_string
+    var team_string = ""
+
     db.transaction(function (transaction) {
-      var sql = "INSERT INTO goals (name, date, team, notes) VALUES (?, ?, ?, ?)";
+      var sql = 'SELECT * FROM caregivers WHERE id=' + team_checked.attr('id').replace('cg-', '');
+      for (var n=1; n<team_checked.length; n++) {
+        sql += ' OR id=' + $(team_checked[n]).attr('id').replace('cg-','');
+      }
+      console.log('team_string sql', sql);
       transaction.executeSql(
         sql,
-        [goal_name, new Date(), team, goal_notes],
+        undefined,
+        function (transaction, result) {
+          for (var i = 0; i < result.rows.length; i++) {
+            var row = result.rows.item(i)
+            team_string += row.name + ", "
+          }
+          team_string.slice(0, -2)
+        },
+        function (transaction, err) {
+          console.error(err);
+        }
+      );
+    });
+
+    // add to databasae
+    db.transaction(function (transaction) {
+      var sql = "INSERT INTO goals (name, date, team, team_string, notes) VALUES (?, ?, ?, ?, ?)";
+      transaction.executeSql(
+        sql,
+        [goal_name, new Date(), team, team_string, goal_notes],
         function (transaction, result) {
           goal_id = result.insertId;
         },
@@ -131,7 +157,7 @@ $(document).on('tap', '#add-goal-action', function () {
     });
 
     db.transaction(function (transaction) {
-      var sql = 'DROP TABLE status' + goal_id;
+      var sql = 'DROP TABLE IF EXISTS status' + goal_id;
       transaction.executeSql(
         sql,
         undefined,
@@ -146,7 +172,9 @@ $(document).on('tap', '#add-goal-action', function () {
             transaction.executeSql(
               sql, 
               undefined, 
-              function () {}, 
+              function () {
+                console.log('status'+ goal_id + ' table created!');
+              }, 
               function (transaction, err) {
                 console.error(err);
               }
@@ -281,12 +309,12 @@ function display_goals(sorted_by) {
             var row = result.rows.item(i);
             $("#goals-list").append(
               "<li id='" + row.id + "' class='ui-li-has-alt'>"
-              + "<a href='#add-goal' onclick='set_details("+row.id+")' class='ui-btn'>" 
+              + "<a href='#goal-detail' onclick='set_details("+row.id+")' class='ui-btn'>" 
               + "<div id='goal-display-" + row.id + "' style='height:80px;width:100px;display:inline-block;margin-right:30px'></div>"
                 + "<div style='display:inline-block'>"
                   + "<h2>" + row.name + "</h2>"
                   + "<p>" + row.date + "</p>"
-                  + "<p><strong>Team:</strong> " + row.team + "</p>"
+                  + "<p><strong>Team:</strong> " + row.team_string + "</p>"
                 + "</div>"
                 
               + "</a>"
@@ -309,6 +337,11 @@ function display_linegraph(id, type){
 
   var data = new Array();
 
+  if (type == 'large') {
+    $("#goal-info-statuses").empty();
+    $('#goal-info-chart').empty();
+  }
+
   db.transaction(function (transaction) {
     var sql = 'SELECT * FROM status' + id;
     transaction.executeSql(
@@ -318,12 +351,31 @@ function display_linegraph(id, type){
         for (var i = 0; i < result.rows.length; i++) {
           var row = result.rows.item(i);
           var date_format = d3.time.format.iso.parse;
-          console.log(row.date);
-          console.log(date_format(row.date));
+          // var new_date_format = d3.time.format('%m-%d-%Y');
+          // console.log(row.date);
+          // console.log(date_format(row.date));
           data.push({
             date: date_format(row.date),
             progress: +row.progress
           });
+
+          if (type == 'large') {
+            // add in the list
+
+            $('#goal-info-statuses').append(
+              "<li data-icon='info'>" 
+                + "<a href='#goal-info-status-notes' class='ui-btn'>" + row.date + "</a>"
+              + "</li>"
+              // + "<div id='goal-info-status-notes' data-role='popup'>"
+              //   + "<div data-role='fieldcontain'>"
+              //     + "<label for='update-notes'>Notes:</label>"
+              //     + "<textarea name='update-notes' id='update-notes'>" 
+              //       + row.notes
+              //     + "</textarea>"
+              //   + "</div>"
+              // + "</div>"
+            );
+          }
         }
         display_linegraph_data(id, data, type);
       },
@@ -336,7 +388,7 @@ function display_linegraph(id, type){
 
 function display_linegraph_data(id, data, type) {
 
-  console.log(id, data, type);
+  // console.log(id, data, type);
 
   if (type == 'mini'){
     var margin = {top: 10, right: 10, bottom: 20, left: 20},
@@ -386,8 +438,123 @@ function display_linegraph_data(id, data, type) {
         .attr("class", "line")
         .attr("d", line);
   }
+  if (type == 'large') {
+    var margin = {top: 20, right: 20, bottom: 30, left: 30},
+      width = 400 - margin.left - margin.right,
+      height = 300 - margin.top - margin.bottom;
+
+    var x = d3.time.scale()
+        .range([0, width]);
+
+    var y = d3.scale.linear()
+        .range([height, 0]);
+
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom")
+
+    var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left")
+
+    var line = d3.svg.line()
+        .x(function(d) { return x(d.date); })
+        .y(function(d) { return y(d.progress); });
+
+    var svg = d3.select("#goal-info-chart").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    x.domain(d3.extent(data, function(d) { return d.date; }));
+    y.domain(d3.extent(data, function(d) { return d.progress; }));
+
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis)
+      .append('text')
+        .attr('class', 'label')
+        .attr('x', width)
+        .attr('y', -6)
+        .style("text-anchor", "end")
+        .text('Time');
+
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis)
+     .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("Progress");
+
+    svg.append("path")
+        .datum(data)
+        .attr("class", "line")
+        .attr("d", line);
+  }
 
 }
+
+/** DISPLAY GOAL DETAILS **/
+function set_details(id) {
+
+  // get basic info
+  db.transaction(function (transaction) {
+    var sql = 'SELECT * FROM goals WHERE id=' + id;
+    transaction.executeSql(
+      sql,
+      undefined,
+      function (transaction, result) {
+        var item = result.rows.item(0);
+        $('#goal-info-name').text(item.name);
+        $('#goal-info-id').text(item.id);
+        $('#goal-info-team').text("Team: " + item.team_string);
+        $('#goal-info-notes').val(item.notes);
+      },
+      function (transaction, err) {
+        console.error(err);
+      }
+    );
+  })
+
+  // get status info
+
+  display_linegraph(id, 'large');
+}
+
+$(document).on('tap', '#goal-info-add-status', function() {
+  display_status_details($('#goal-info-id').text())
+});
+
+// edit notes
+
+// put text of notes to edit
+$(document).on('tap', '#edit-notes-button', function() {
+  $('#edit-notes-field').val($('#goal-info-notes').val());
+});
+
+// save edit notes
+$(document).on('tap', '#edit-notes-save', function() {
+  var cid = $('#goal-info-id').text();
+  var notesval = $('#edit-notes-field').val();
+  db.transaction(function (transaction) {
+    var sql = "UPDATE goals SET notes='" + notesval + "' WHERE id='" + cid + "'";
+    console.log(sql);
+    transaction.executeSql(
+      sql, 
+      undefined, 
+      function () {}, 
+      function (transaction, error) {
+        console.error("error: " + error.message);
+      }
+    );
+  });
+  $('#goal-info-notes').val(notesval);
+});
 
 /** ADD STATUS UPDATE **/
 
@@ -428,7 +595,16 @@ $(document).on('tap', '#update-action', function () {
         sql,
         [date, progress, notes],
         function (transaction, result) {
+
+          // clear things out
+          $('#update-goal-id').val('');
+          $('#update-date').val('');
+          $('#update-progress').val('');
+          $('#update-notes').val('');
+
+          display_goals(DEFAULT_SORT);
           $.mobile.changePage('#list-goals');
+
         },
         function (transaction, err) {
           console.error(err);
