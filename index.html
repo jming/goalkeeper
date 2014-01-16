@@ -11,11 +11,6 @@
     <link rel='stylesheet' href='css/app.css' />
     <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700' rel='stylesheet' type='text/css'>
 
-    <!-- scripts -->
-    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-    <script src="http://code.jquery.com/mobile/1.4.0/jquery.mobile-1.4.0.min.js"></script>
-    <script src='js/app.js'></script>
-
   </head> 
 
   <body> 
@@ -130,10 +125,12 @@
     </div><!-- add-goal page -->
 
     <div data-role='page' id='status-update'>
+
       <div data-role='header'>
         <a href='#list-goals' class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-back ui-btn-icon-notext" style='margin:10px;'>back</a>
         <h1>New status update</h1>
       </div><!-- status-update header -->
+
       <div data-role='main' class='ui-content'>
 
         <form>
@@ -168,10 +165,25 @@
 
         </form>
 
-
-
       </div><!-- status-update content -->
     </div><!-- status-update page -->
+
+    <div data-role='page' id='goal-detail'>
+
+      <div data=role='header'>
+      </div><!-- goal-detail header -->
+
+      <div data-role='main' class='ui-content'>
+      </div><!-- goal-detail content -->
+
+    </div><!-- goal-detail page -->
+
+     <!-- scripts -->
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.0/jquery.mobile-1.4.0.min.js"></script>
+    <script src='js/app.js'></script>
+    <!-- // <script src="http://d3js.org/d3.v3.js"></script> -->
+    <script src="http://d3js.org/d3.v3.min.js"></script>
 
   </body>
 
