@@ -36,7 +36,7 @@
         <form>
           <div class="ui-field-contain">
               <label for="sort-goals">Sort by:</label>
-              <select name="sort-goals" id="sort-goal">
+              <select name="sort-goals" id="sort-goals">
                   <option value="date">Date</option>
                   <option value="name">Name</option>
               </select>
@@ -93,8 +93,8 @@
                   <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
 
                   <form>
-                    <div style='padding:10px 20px;'>
-                      <h3> Add a caregiver </h3>
+                    <div style='padding:10px 20px; width:300px'>
+                      <h2> Add a caregiver </h2>
                       <label for='caregiver-name'>Caregiver name:</label>
                       <input type='text' name='cg-name' id='cg-name'>
                       <label for='cg-specialty'>Specialty:</label>
@@ -107,6 +107,75 @@
               </div><!-- add team member div -->
             </fieldset>
           </div><!-- team member field -->
+
+          <div data-role='fieldcontain'>
+            <fieldset data-role='controlgroup' id='status-updates'>
+              <legend>Status updates</legend>
+              <div id='update-choices-div'>
+              </div><!-- update-choices-div div -->
+
+              <div>
+
+                <p id='no-sc'>You currently have no status update types stored.</p>
+
+                <a href='#add-status-choice' data-rel='popup' class='ui-btn' id='add-status-choice-button'>Add status update type</a>
+
+                <div data-role='popup' id='add-status-choice'>
+                  
+                  <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+
+                  <form>
+
+                    <div style='padding:10px 20px; width:300px'>
+
+                      <h2>Add status update type</h2>
+
+                      <label for='sc-name'>Status update name:</label>
+                      <input type='text' name='sc-name' id='sc-name' /><!-- status update name -->
+                      
+                      <div class="ui-field-contain">
+                          <label for="sc-freq">Input frequency:</label>
+                          <select name="sc-freq" id="sc-freq">
+                              <option value="daily">Daily</option>
+                              <option value="weekly">Weekly</option>
+                              <option value="monthly">Monthly</option>
+                          </select>
+                      </div><!-- status choice frequency -->
+
+                      <div class="ui-field-contain">
+                          <label for="sc-type">Input type:</label>
+                          <select name="sc-type" id="sc-type">
+                              <option value="text">Text only</option>
+                              <option value="number">Number</option>
+                          </select>
+                      </div><!-- input type -->
+
+                      <div id='sc-number' style='display:none;'>
+                        <div data-role="rangeslider">
+                          <label for="sc-range-1a">Update range:</label>
+                          <input type="range" name="sc-range-1a" id="sc-range-1a" min="0" max="100" value="0">
+                          <label for="sc-range-1b">Update range:</label>
+                          <input type="range" name="sc-range-1b" id="sc-range-1b" min="0" max="100" value="100">
+                        </div>
+                        <label for="sc-trigger">Trigger threshold</label>
+                        <input type="number" name="sc-trigger" id="sc-trigger" value="50">
+                      </div>
+                      
+                      <label for='sc-notes'>Notes:</label>
+                      <textarea name='sc-notes' id='sc-notes'></textarea>
+
+                      <a href="#" data-rel="back" class="ui-btn" id='add-status-choice-action'>Add status update type</a>
+
+                    </div>
+
+                  </form><!-- add status-choice form -->
+                  
+                </div><!-- add-status-choice popup -->
+
+              </div><!-- add-status-choice div -->
+
+            </fieldset>
+          </div><!-- status updates field -->
 
           <div data-role='fieldcontain'>
             <label for='goal-notes'>
@@ -191,7 +260,7 @@
                 <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
                 <form>
                   <div style='padding:20px 20px;'>
-                    <h3>Edit notes</h3>
+                    <h2>Edit notes</h2>
                     <textarea name='edit-notes-field' id='edit-notes-field'></textarea>
                     <a href="#" data-rel="back" class="ui-btn" id='edit-notes-save'>Save</a>
                   </div>

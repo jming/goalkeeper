@@ -41,6 +41,27 @@ db.transaction (function (transaction) {
   );
 });
 
+// statustypes database
+db.transaction (function (transaction) {
+  var sql = 'CREATE TABLE IF NOT EXISTS statustypes'
+    + " (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
+    + " name VARCHAR(250) NOT NULL,"
+    + " freq VARCHAR(10) NOT NULL,"
+    + " type VARCHAR(10) NOT NULL,"
+    + " range1a INTEGER,"
+    + " range1b INTEGER,"
+    + " trigger INTEGER,"
+    + " notes TEXT)"
+  transaction.executeSql(
+    sql,
+    undefined,
+    function () {},
+    function (transaction, err) {
+      console.error(err);
+    }
+  );
+})
+
 // clear everything!
 $(document).on('tap', '#clear-all-goals', function () {
 
@@ -75,6 +96,18 @@ $(document).on('tap', '#clear-all-goals', function () {
 
   db.transaction(function (transaction) {
     var sql = 'DROP TABLE caregivers';
+    transaction.executeSql(
+      sql,
+      undefined,
+      function () {},
+      function (transaction, err) {
+        console.error(err);
+      }
+    );
+  });
+
+  db.transaction(function (transaction) {
+    var sql = 'DROP TABLE statustypes';
     transaction.executeSql(
       sql,
       undefined,
@@ -168,7 +201,7 @@ $(document).on('tap', '#add-goal-action', function () {
               + "date DATETIME NOT NULL, "
               + "progress INTEGER NOT NULL,"
               + "notes TEXT NOT NULL)"
-            console.log(sql);
+            // console.log(sql);
             transaction.executeSql(
               sql, 
               undefined, 
@@ -204,6 +237,7 @@ $(document).on('tap', '#add-goal-action', function () {
     alert('Please fill in all required fields!');
   }
 });
+
 
 /** TEAM MEMBERS **/
 
@@ -265,16 +299,119 @@ function display_team_choices() {
         }
       },
       function (transaction, err) {
-        console.err(err);
+        console.error(err);
       }
     );
   });
+}
+
+/** STATUS TYPES **/
+// add input type
+
+$(document).ready(function () {
+  $('#sc-type').change(function() {
+
+    var selected = $('#sc-type option:selected').val()
+    // console.log('sc-type change');
+    if (selected == 'number') {
+      $('#sc-number').css('display', 'block');
+    }
+    if (selected == 'text') {
+      $('#sc-number').css('display', 'none')
+    }
+
+  });
+});
+
+$(document).on('tap', '#add-status-choice-action', function () {
+
+  var name = $('#sc-name').val();
+  var freq = $('#sc-freq input:selected').val();
+  var type = $('#sc-type input:selected').val();
+  var range1a = $('#sc-range-1a').val();
+  var range1b = $('#sc-range-1b').val();
+  var trigger = $('#sc-trigger').val();
+  var notes = $('#sc-notes').val();
+
+  if ((name != '') && (trigger < range1b)){
+
+    db.transaction(function (transaction) {
+      var sql = 'INSERT INTO statustypes (name, freq, type, range1a, range1b, trigger, notes) VALUES (?, ?, ?, ?, ?, ?, ?)';
+      transaction.executeSql(
+        sql,
+        [name, freq, type, range1a, range1b, trigger, notes],
+        function (transaction, result) {
+          var i = result.insertId;
+
+          $('#sc-name').val('');
+          $('#sc-range-1a').val(0);
+          $('#sc-range-1b').val(100);
+          $('#sc-trigger').val(50);
+          $('#sc-notes').val('');
+
+          $("#sc-freq").val('daily').attr('selected', true).siblings('option').removeAttr('selected');
+          $("#sc-type").val('text').attr('selected', true).siblings('option').removeAttr('selected');
+
+          $('#sc-number').css('display', 'none');
+
+          display_status_types();
+
+          setTimeout(function() {
+            $('#sc-' + i).prop('checked', true).checkboxradio('refresh');
+          }, 100);
+        },
+        function (transaction, err) {
+          console.error(err);
+        }
+      );
+    });
+  } else  if (trigger > range1b) {
+    alert('Trigger threshold cannot be larger than range. Please fix and submit again.')
+  }
+  else {
+    alert('Please fill out required values!');
+  }
+
+});
+
+function display_status_types() {
+  db.transaction(function (transaction) {
+    var sql = 'SELECT * FROM statustypes';
+    transaction.executeSql(
+      sql,
+      undefined,
+      function (transaction, result) {
+        if (result.rows.length) {
+          $('#no-sc').css('display', 'none');
+          var sc_displayed = $('#update-choices-div input').length;
+          for (var i=sc_displayed; i < result.rows.length; i++) {
+            var row = result.rows.item(i);
+            var scid = 'sc-' + row.id;
+            $('#update-choices-div').append(
+              "<input type='checkbox' name='" + scid + "' id='" + scid + "' />"
+              + "<label for='" + scid + "'>" + row.name + "</label>"
+            ).trigger('create');
+          }
+        }
+      },
+      function (transaction, err) {
+        console.error(err);
+      }
+    );
+  })
 }
 
 /** DISPLAY GOALS **/ 
 $(document).on('pageshow', '#list-goals', function () {
 
   display_goals(DEFAULT_SORT);
+
+  $('#sort-goals').change(function() {
+
+    var selected = $('#sort-goals option:selected').val();
+
+    display_goals(selected);
+  });
 
 });
 
